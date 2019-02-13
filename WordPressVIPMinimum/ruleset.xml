@@ -59,8 +59,7 @@
 
 	<!-- WordPress.com: https://lobby.vip.wordpress.com/wordpress-com-documentation/code-review-what-we-look-for/#eval-create_function -->
 	<!-- VIP-Go: https://vip.wordpress.com/documentation/vip-go/code-review-blockers-warnings-notices/#eval-and-create_function -->
-	<rule ref="Squiz.PHP.Eval"/>
-	<rule ref="Squiz.PHP.Eval.Discouraged">
+	<rule ref="Squiz.PHP.Eval">
 		<type>error</type>
 		<message>`eval()` is a security risk so not allowed.</message>
 	</rule>
@@ -121,7 +120,7 @@
 	</rule>
 	<!-- WordPress.com: https://lobby.vip.wordpress.com/wordpress-com-documentation/code-review-what-we-look-for/#settings-alteration -->
 	<!-- VIP-Go: https://vip.wordpress.com/documentation/vip-go/code-review-blockers-warnings-notices/#settings-alteration -->
-	<rule ref="WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure">
+	<rule ref="WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_phpinfo">
 		<type>error</type>
 	</rule>
 	<rule ref="WordPress.PHP.DevelopmentFunctions.error_log_error_log">
@@ -135,15 +134,18 @@
 	<!-- VIP-Go: https://vip.wordpress.com/documentation/vip-go/code-review-blockers-warnings-notices/#filesystem-operations -->
 	<!-- VIP-Go: https://vip.wordpress.com/documentation/vip-go/code-review-blockers-warnings-notices/#remote-calls -->
 	<rule ref="WordPress.WP.AlternativeFunctions">
+		<!-- This is already covered in WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown -->
 		<exclude name="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents"/>
+		<!-- This is already covered in WordPressVIPMinimum.Functions.StripTags.StripTagsOneParameter -->
 		<exclude name="WordPress.WP.AlternativeFunctions.strip_tags_strip_tags"/>
+		<!-- This is already covered in WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_fwrite -->
+		<exclude name="WordPress.WP.AlternativeFunctions.file_system_read_fwrite"/>
+		<!-- This is already covered in WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_fwrite -->
+		<exclude name="WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents"/>
 	</rule>
 	<!-- VIP recommends other functions -->
 	<rule ref="WordPress.WP.AlternativeFunctions.curl">
 		<message>Using cURL functions is highly discouraged within VIP context. Check (Fetching Remote Data) on VIP Documentation.</message>
-	</rule>
-	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents">
-		<message>`%s()` is highly discouraged, please use `vip_safe_wp_remote_get()` instead.</message>
 	</rule>
 
 	<rule ref="WordPressVIPMinimum.Functions.RestrictedFunctions.get_posts_get_children">
@@ -155,16 +157,6 @@
 		<properties>
 			<property name="allowUnusedCaughtExceptions" value="1"/>
 		</properties>
-	</rule>
-
-	<!-- Silence is golden -->
-	<rule ref="WordPress.WP.AlternativeFunctions.file_system_read_fwrite">
-		<!-- We are silencing this because we have WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_fwrite -->
-		<severity>0</severity>
-	</rule>
-	<rule ref="WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents">
-		<!-- We are silencing this because we have WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents -->
-		<severity>0</severity>
 	</rule>
 
 </ruleset>

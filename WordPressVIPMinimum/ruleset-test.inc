@@ -1,34 +1,79 @@
-<?php
 
-// WordPress.XSS.EscapeOutput
+<?php // Squiz.WhiteSpace.SuperfluousWhitespace
+
+// Generic.PHP.Syntax
+while { // Error.
+}
+
+// Generic.PHP.NoSilencedErrors
+if (@in_array( $array, $needle, true )) { // Error.
+    echo '@';
+}
+
+// WordPress.Security.EscapeOutput
 echo $hello; // Error.
 
-// WordPress.CSRF.NonceVerification
+// WordPress.Security.NonceVerification
 function bar() {
 	if ( ! isset( $_POST['test'] ) ) { // Error.
-		return;
 	}
 }
 
-?>
-<!-- WordPress.WP.EnqueuedResources -->
-<script src="http://someurl/somefile.js"></script> <!-- Error. -->
-<?php
-// WordPress.WP.PreparedSQL
-$wpdb->query( "SELECT * FROM $wpdb->posts WHERE post_title LIKE '" . $_GET['title'] . "';" ); // Error + Warning.
-
-// WordPress.Variables.GlobalVariables
-function foo() {
-	global $page; // WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable // Warning.
-	$page = get_post( $post_id ); // WordPressVIPMinimum.Variables.VariableAnalysis.UndefinedVariable // Error + Warning.
+// WordPress.Security.ValidatedSanitizedInput
+if ( isset( $_POST['nonce'] ) && wp_verify_nonce( sanitize_text_field( $_POST['nonce'] ) ) ) {
+	bar( $_POST['foo2'] ); // Error x 2.
+	$foo2 = isset( $_POST['foo2'] ) ?? foo( sanitize_text_field( $_POST['foo2'] ) ); // Ok - exclude WordPress.Security.ValidatedSanitizedInput.MissingUnslash.
 }
+
+// WordPress.Security.PluginMenuSlug
+add_menu_page( $page_title, $menu_title, $capability, __FILE__, $function, $icon_url, $position ); // Warning.
+
+// WordPress.WP.EnqueuedResources
+?> <script src="http://someurl/somefile.js"></script> <?php // Error.
+
+// WordPress.WP.PostsPerPage
+$args = array(
+	'posts_per_page' => 999, // Warning.
+);
+_query_posts( 'posts_per_page=999' ); // Warning.
+$query_args['posts_per_page'] = 999; // Warning.
+
+// WordPress.WP.TimezoneChange
+date_default_timezone_set( 'FooBar' ); // Error.
+
+// WordPress.DB.PreparedSQL
+$b = function () {
+	global $wpdb;
+	$listofthings = wp_cache_get( $listofthings );
+	if ( ! $listofthings ) {
+		$foo = "column = 'test'";
+		$listofthings = $wpdb->query( 'SELECT something FROM somewhere WHERE ' . $foo ); // DB call ok; Error.
+		wp_cache_set( 'foo', $listofthings );
+	} 
+};
+
+// WordPress.DB.DirectDatabaseQuery
+$baz = $wpdb->get_results( $wpdb->prepare( 'SELECT X FROM Y ' ) ); // Warning x 2.
+
+// WordPress.DB.SlowDBQuery
+$test = [
+	'tax_query' => [], // Warning.
+];
+new WP_Query( array(
+	'meta_query' => [], // Warning.
+	'meta_key' => 'foo', // Warning.
+	'meta_value' => 'bar', // Warning.
+) );
+
+// WordPress.WP.GlobalVariablesOverride
+$GLOBALS['wpdb'] = 'test'; // Error.
 
 // WordPress.PHP.StrictComparisons
 if ( true == $true ) { // Warning.
 }
 
-// WordPress.PHP.YodaConditions
-if ( $true === true ) { // Ok.
+// WordPress.CodeAnalysis.AssignmentInCondition
+if ( $test = get_post( $post ) ) { // Warning.
 }
 
 // WordPress.PHP.StrictInArray
@@ -38,14 +83,30 @@ if ( true === in_array( $foo, $bar ) ) { // Warning.
 // WordPress.Functions.DontExtract
 extract( $foobar ); // Error.
 
-// WordPress.PHP.DevelopmentFunctions
-error_log( 'Hey there!' ); // Error.
-var_export( $foo ); // Warning.
-var_dump( $bar ); // Warning.
+// WordPress.WP.CronInterval
+function my_add_weekly( $schedules ) {
+	$schedules['every_6_mins'] = array(
+		'interval' => 360,
+		'display' => __( 'Once every 6 minutes' )
+	);
+	return $schedules;
+}
+add_filter( 'cron_schedules', 'my_add_weekly'); // Error.
 
-// WordPress.PHP.DiscouragedPHPFunctions
-error_reporting(); // Error.
-ini_set(); // Error.
+// Generic.NamingConventions.ConstructorName
+class TestClass extends MyClass
+{
+    function __construct() {
+        parent::MYCLASS(); // Error.
+        parent::__construct();
+    }
+}
+class OldClass
+{
+    function OldClass() // Error.
+    {
+    }
+}
 
 // Generic.NamingConventions.ConstructorName
 class TestClass extends MyClass {
@@ -55,13 +116,127 @@ class TestClass extends MyClass {
     }
 }
 
-?>
-<!-- Generic.PHP.DisallowShortOpenTag -->
-<?= $foo ?> <!-- Error. -->
+// Generic.PHP.DisallowShortOpenTag
+?> <?= esc_html( $var );
 
-<?php
+// Squiz.PHP.CommentedOutCode
+// if (empty($this)) {echo 'This is will not work';} // Warning.
+
+// Squiz.PHP.Eval
+eval('$var = 4;'); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions
+base64_decode( 'VGhpcyBpcyBhbiBlbmNvZGVkIHN0cmluZw=='); // Ok - exclude obfuscation group.
+base64_encode( 'This is an encoded string' ); // Ok - exclude obfuscation group.
+convert_uudecode( "+22!L;W9E(%!(4\"$`\n`" ); // Ok - exclude obfuscation group.
+convert_uuencode( "test\ntext text\r\n" ); // Ok - exclude obfuscation group.
+str_rot13( 'The quick brown fox jumps over the lazy dog.' ); // Ok - exclude obfuscation group.
+serialize(); // Warning.
+unserialize(); // Warning.
+urlencode(); // Warning.
+passthru( 'cat myfile.zip', $err ); // Warning.
+$process = proc_open( 'php', $descriptorspec, $pipes, $cwd, $env ); // Warning.
+$last_line = system( 'ls', $retval ); // Warning.
+$handle = popen( '/bin/ls', 'r' ); // Warning.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_ini_set
+ini_set(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
+error_reporting(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_ini_alter
+ini_alter(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_ini_restore
+ini_restore(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_apache_setenv
+apache_setenv(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_putenv
+putenv(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_set_include_path
+set_include_path(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_restore_include_path
+restore_include_path(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_magic_quotes_runtime
+magic_quotes_runtime(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_set_magic_quotes_runtime
+set_magic_quotes_runtime(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_dl
+dl(); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec
+exec( 'whoami' ); // Error.
+
+// WordPress.PHP.DiscouragedPHPFunctions.system_calls_shell_exec
+$output = shell_exec( 'ls -lart' ); // Error.
+
+// WordPress.PHP.DevelopmentFunctions
+var_dump(); // Warning.
+var_export(); // Warning.
+print_r(); // Warning.
+trigger_error(); // Warning.
+set_error_handler(); // Warning.
+debug_backtrace(); // Warning.
+debug_print_backtrace(); // Warning.
+wp_debug_backtrace_summary(); // Warning.
+
+// WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_phpinfo
+phpinfo(); // Error.
+
+// WordPress.PHP.DevelopmentFunctions.error_log_error_log
+error_log(); // Error.
+
 // WordPress.WP.AlternativeFunctions
 curl_init(); // Warning.
+curl_close( $ch ); // Warning.
+CURL_getinfo(); // Warning.
+parse_url( 'http://example.com/' ); // Warning.
+$json = json_encode( $thing ); // Warning.
+readfile(); // Warning.
+fopen(); // Warning.
+fsockopen(); // Warning.
+pfsockopen(); // Warning.
+fclose(); // Warning.
+fread(); // Warning.
+rand(); // Warning.
+mt_rand(); // Warning.
+srand(); // Warning.
+mt_srand(); // Warning.
+wp_rand(); // OK.
+parse_url($url, PHP_URL_SCHEME); // Warning.
+
+// WordPressVIPMinimum.Functions.RestrictedFunctions.get_posts_get_children
+get_children(); // Error.
+
+// WordPressVIPMinimum.Variables.VariableAnalysis
+function foo() {
+	$a = 'Hello';
+	$c = compact( $a, $b ); // Warning x 2.
+	try {
+		do_something_silly();
+	} catch ( Exception $e ) {} // Ok.
+}
+
+<!-- The below rules are implicitly included via WordPressVIPMinimum -->
+// WordPressVIPMinimum.Classes.DeclarationCompatibility
+class MyWidget extends WP_Widget {
+	function widget() {
+	} // Error.
+}
+
+// WordPressVIPMinimum.Classes.RestrictedExtendClasses
+class BadTestClass extends WP_CLI_Command { } // Warning.
+
+// WordPressVIPMinimum.Compatibility.Robotstxt.DoRobotsTxtFound
+add_action( 'do_robotstxt', 'my_do_robotstxt');
 
 // WordPressVIPMinimum.Hooks.PreGetPosts
 add_action( 'pre_get_posts', function( $wp_query ) {
@@ -74,11 +249,7 @@ add_action( 'pre_get_posts', function( $wp_query ) {
 $bad_wp_users = wp_cache_get( md5( self::CACHE_KEY . '_wp_users'), self::CACHE_GROUP );
 $bad_wp_users = false; // Error.
 
-// WordPressVIPMinimum.Classes.DeclarationCompatibility
-class MyWidget extends WP_Widget {
-	function widget() {
-	} // Error (line above), missing $args and $instance params.
-}
+
 
 // WordPressVIPMinimum.Constants.RestrictedConstants
 if ( A8C_PROXIED_REQUEST === true ) { // Warning.
@@ -91,9 +262,6 @@ require_once "my_file.php"; // Error.
 $my_theme_options = get_option( 'my_theme', false );
 if ( array_key_exists( 'key', $my_theme_options ) ) { // Error.
 }
-
-// Generic.PHP>NoSilencedErrors + WordPressVIPMinimum.Functions.RestrictedFunctions.file_get_contents_file_get_contents
-@file_get_contents( $foo ); // Error + Warning.
 
 // WordPressVIPMinimum.Performance.RegexpCompare + WordPress.DB.SlowDBQuery
 $query_args = array(
@@ -188,4 +356,7 @@ update_site_option( $bar, $foo, true ); // Error.
 // WordPressVIPMinimum.Functions.RestrictedFunctions.site_option_delete_site_option
 delete_site_option( $foo ); // Error.
 
-?> <!-- closing PHP tag should be omitted -->
+// PSR2.Files.ClosingTag + Squiz.WhiteSpace.SuperfluousWhitespace
+?>
+
+
