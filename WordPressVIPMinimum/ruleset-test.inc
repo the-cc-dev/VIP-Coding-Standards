@@ -235,8 +235,30 @@ class MyWidget extends WP_Widget {
 // WordPressVIPMinimum.Classes.RestrictedExtendClasses
 class BadTestClass extends WP_CLI_Command { } // Warning.
 
-// WordPressVIPMinimum.Compatibility.Robotstxt.DoRobotsTxtFound
-add_action( 'do_robotstxt', 'my_do_robotstxt');
+// WordPressVIPMinimum.Compatibility.ZoninatorSniff
+wpcom_vip_load_plugin( 'zoninator', 'plugins', '0.8' ); // Warning.
+
+// WordPressVIPMinimum.Constants.ConstantString
+define( WPCOM_VIP ); // Error.
+
+// WordPressVIPMinimum.Constants.RestrictedConstants
+if ( A8C_PROXIED_REQUEST === true ) { // Warning.
+}
+define( 'A8C_PROXIED_REQUEST', false ); // Error.
+define( 'JETPACK_DEV_DEBUG', true ); // Error.
+define( 'WP_CRON_CONTROL_SECRET' ); // Error.
+
+// WordPressVIPMinimum.Files.IncludingFile
+include ( MY_CONSTANT . "my_file.php" ); // Warning.
+require_once( custom_function( 'test_file.php' ) ); // Warning.
+require '../my_file.php'; // Error.
+include_once("http://www.google.com/bad_file.php"); // Error.
+
+
+
+
+
+
 
 // WordPressVIPMinimum.Hooks.PreGetPosts
 add_action( 'pre_get_posts', function( $wp_query ) {
@@ -249,14 +271,6 @@ add_action( 'pre_get_posts', function( $wp_query ) {
 $bad_wp_users = wp_cache_get( md5( self::CACHE_KEY . '_wp_users'), self::CACHE_GROUP );
 $bad_wp_users = false; // Error.
 
-
-
-// WordPressVIPMinimum.Constants.RestrictedConstants
-if ( A8C_PROXIED_REQUEST === true ) { // Warning.
-}
-
-// WordPressVIPMinimum.Files.IncludingFile
-require_once "my_file.php"; // Error.
 
 // WordPressVIPMinimum.Functions.CheckReturnValue
 $my_theme_options = get_option( 'my_theme', false );
@@ -282,8 +296,6 @@ wp_remote_post( $this->endpoint, array(
     )
 );
 
-// Squiz.PHP.Eval
-eval( ';' ); // Error.
 
 // WordPressVIPMinimum.Functions.RestrictedFunctions
 wpcom_vip_irc(); // Error.
