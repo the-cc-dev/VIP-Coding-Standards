@@ -56,14 +56,6 @@ $x = isset( $_COOKIE['bar'] ) ? sanitize_key( $_COOKIE['bar'] ) : ''; // Error.
 if ( ! isset( $_SERVER['HTTP_USER_AGENT'] ) ) { // Error.
 }
 
-// Generic.NamingConventions.ConstructorName.OldStyle
-class OldClass
-{
-    function OldClass() // Error.
-    {
-    }
-}
-
 // WordPress.Security.EscapeOutput.OutputNotEscaped
 echo $foo; // Error.
 echo 'Some Raw String';  // Ok.
@@ -115,7 +107,7 @@ _query_posts( 'posts_per_page=999' ); // Warning.
 $query_args['posts_per_page'] = 999; // Warning.
 $query_args['posts_per_page'] = 1; // OK.
 
-// WordPressVIPMinimum.Hooks.RestrictedHooks.UploadMimes
+// WordPressVIPMinimum.Hooks.RestrictedHooks.upload_mimes
 add_filter( 'upload_mimes', 'foo' ); // Warning.
 
 // WordPressVIPMinimum.Security.PHPFilterFunctions

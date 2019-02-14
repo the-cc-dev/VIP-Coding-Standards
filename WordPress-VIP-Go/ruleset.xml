@@ -87,7 +87,6 @@
 	<!-- Things that really should be fixed, but don't necessarily have to be for the site to work.
 		 This includes potential security holes as well as functions that may bring down sites for performance reasons.
 	 -->
-	<rule ref="Generic.NamingConventions.ConstructorName.OldStyle"/>
 	<rule ref="WordPress.Security.EscapeOutput.OutputNotEscaped"/>
 	<!-- Should fix all of them but it doesn't need a manual review -->
 	<rule ref="WordPress.WP.AlternativeFunctions.file_system_read_fclose">
@@ -121,7 +120,7 @@
 	<rule ref="WordPress.WP.PostsPerPage.posts_per_page_posts_per_page">
 		<message>Having more than 100 posts returned per page may lead to severe performance problems.</message>
 	</rule>
-	<rule ref="WordPressVIPMinimum.Hooks.RestrictedHooks.UploadMimes">
+	<rule ref="WordPressVIPMinimum.Hooks.RestrictedHooks.upload_mimes">
 		<severity>10</severity>
 	</rule>
 	<rule ref="WordPressVIPMinimum.Security.PHPFilterFunctions">
